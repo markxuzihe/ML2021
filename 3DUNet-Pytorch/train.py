@@ -130,7 +130,7 @@ if __name__ == '__main__':
         train_log = train(model, train_loader, optimizer, loss, args.n_labels, alpha)
         val_log = val(model, val_loader, loss, args.n_labels)
         log.update(epoch, train_log, val_log)
-
+        
         # Save checkpoint.
         state = {'net': model.state_dict(), 'optimizer': optimizer.state_dict(), 'epoch': epoch}
         torch.save(state, os.path.join(save_path, 'latest_model.pth'))
