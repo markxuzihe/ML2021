@@ -211,24 +211,24 @@ class ribfrac_test_preprocess:
 
 
 if __name__ == '__main__':
-    raw_dataset_path = '../dataset/ribfrac/train'
-    fixed_dataset_path = '../dataset/ribfrac/fixed_train'
+    raw_dataset_path = '../dataset/train'
+    fixed_dataset_path = '../dataset/fixed_train'
 
     # args = config.args
     # tool = ribfrac_train_preprocess(raw_dataset_path, fixed_dataset_path, args)
     # tool.fix_data()  # 对原始图像进行修剪并保存
 
 
-    raw_dataset_path = '../dataset/ribfrac/val'
-    fixed_dataset_path = '../dataset/ribfrac/fixed_val'
+    raw_dataset_path = '../dataset/val'
+    fixed_dataset_path = '../dataset/fixed_val'
 
     # args = config.args
     # tool = ribfrac_val_preprocess(raw_dataset_path, fixed_dataset_path, args)
     # tool.fix_data()  # 对原始图像进行修剪并保存
 
 
-    raw_dataset_path = '../dataset/ribfrac/test'
-    fixed_dataset_path = '../dataset/ribfrac/fixed_test'
+    raw_dataset_path = '../dataset/test'
+    fixed_dataset_path = '../dataset/fixed_test'
 
     args = config.args
     tool = ribfrac_test_preprocess(raw_dataset_path, fixed_dataset_path, args)
