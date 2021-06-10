@@ -118,7 +118,7 @@ if __name__ == '__main__':
     # common.print_network(model)
     model = torch.nn.DataParallel(model, device_ids=args.gpu_id)  # multi-GPU
 
-    loss = loss.TverskyLoss()
+    loss = loss.DiceLoss()
 
     log = logger.Train_Logger(save_path, "train_log")
 

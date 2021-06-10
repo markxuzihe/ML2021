@@ -1,22 +1,26 @@
+from dataset.dataset_rib_val import Val_Dataset
+from dataset.dataset_rib_train import Train_Dataset
+
 from torch.utils.data import DataLoader
 import torch
+import torch.optim as optim
 from tqdm import tqdm
 import config
-from utils import logger,common
-from dataset.dataset_rib_test import Test_Datasets,to_one_hot_3d
-import SimpleITK as sitk
+
+from models import UNet, ResUNet, KiUNet_min, SegNet
+
+from utils import logger, weights_init, metrics, common, loss
 import os
 import numpy as np
-from models import ResUNet
-from utils.metrics import DiceAverage
 from collections import OrderedDict
+
 
 
 def predict_one_img(model, img_dataset, args):
     dataloader = DataLoader(dataset=img_dataset, batch_size=1, num_workers=0, shuffle=False)
     model.eval()
     test_dice = DiceAverage(args.n_labels)
-    target = to_one_hot_3d(img_dataset.label, args.n_labels)
+    #target = to_one_hot_3d(img_dataset.label, args.n_labels)
 
     with torch.no_grad():
         for data in tqdm(dataloader,total=len(dataloader)):
@@ -29,7 +33,7 @@ def predict_one_img(model, img_dataset, args):
     pred = torch.argmax(pred,dim=1)
 
     pred_img = common.to_one_hot_3d(pred,args.n_labels)
-    test_dice.update(pred_img, target)
+    #test_dice.update(pred_img, target)
 
     test_dice = OrderedDict({'Dice': test_dice.avg[1]})
 
@@ -42,11 +46,11 @@ def predict_one_img(model, img_dataset, args):
 
 if __name__ == '__main__':
     args = config.args
-    args.test_data_path = "./RibFrac/fixed_test"
+    args.test_data_path = "../dataset/fixed_val"
     save_path = os.path.join('./experiments', args.save)
-    device = torch.device('cpu' if args.cpu else 'cuda')
+    device = torch.device('cpu' if args.cpu else 'cuda:1')
     # model info
-    model = ResUNet(in_channel=1, out_channel=args.n_labels,training=False).to(device)
+    model = UNet(in_channel=1, out_channel=args.n_labels,training=False).to(device)
     model = torch.nn.DataParallel(model, device_ids=args.gpu_id)  # multi-GPU
     ckpt = torch.load('{}/best_model.pth'.format(save_path))
     model.load_state_dict(ckpt['net'])

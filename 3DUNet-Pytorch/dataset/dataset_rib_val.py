@@ -14,7 +14,7 @@ class Val_Dataset(dataset):
 
         self.args = args
         self.filename_list = self.load_file_name_list(args.val_data_path)
-
+        self.filename_list = self.filename_list[:8]
 
         self.transforms = Compose([Center_Crop(base=16, max_size=args.val_crop_max_size)])
 

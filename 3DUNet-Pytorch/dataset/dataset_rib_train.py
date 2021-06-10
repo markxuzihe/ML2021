@@ -15,6 +15,7 @@ class Train_Dataset(dataset):
 
         self.args = args
         self.filename_list = self.load_file_name_list(args.dataset_path)
+        self.filename_list = self.filename_list[:20]
 
         self.transforms = Compose([
                 RandomCrop(self.args.crop_size),
