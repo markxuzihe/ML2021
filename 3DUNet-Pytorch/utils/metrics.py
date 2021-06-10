@@ -2,8 +2,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 import numpy as np
+from sklearn import metrics
 
-
+import matplotlib.pylab as plt
 class LossAverage(object):
     """Computes and stores the average and current value for calculate average loss"""
 
@@ -120,3 +121,42 @@ def _interpolate_recall_at_fp(fp, recall, key_fp):
                    * ((key_fp - fp_0) / (fp_1 - fp_0 + 1e-8))
 
     return recall_at_fp
+
+
+def FROC2(gt_label, pred_label, key_fp_list=(0.5, 1, 2, 4, 8)):
+    """
+
+    :param gt_label: numpy[C,:,:,:]
+    :param pred_label: numpy[C,:,:,:]
+    :param key_fp_list:
+    :return:
+    """
+    gt_num = sum(gt_label)
+    total_num = len(pred_label)
+
+    
+    fpr, tpr, thresholds = metrics.roc_curve(gt_label, pred_label, pos_label=1)
+
+
+    fps = fpr * (total_num -  gt_num) / total_num
+    sens = tpr
+
+    froc = 0
+    count=0
+    # for i in range(len(sens)):
+    #     if i in key_fp_list:
+    #         count+=1
+    #         froc+=
+
+    plt.plot(fps, sens, color='b', lw=2)
+    plt.legend(loc='lower right')
+    # plt.plot([0, 1], [0, 1], 'r--')
+    plt.xlim([0.125, 8])
+    plt.ylim([0, 1.1])
+    plt.xlabel('Average number of false positives per scan') #横坐标是fpr
+    plt.ylabel('True Positive Rate')  #纵坐标是tpr
+    plt.title('FROC performence')
+    plt.show()
+
+
+    #return avg_recall

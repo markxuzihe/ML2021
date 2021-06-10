@@ -1,5 +1,6 @@
+
 from dataset.dataset_rib_val import Val_Dataset
-from dataset.dataset_rib_train import Train_Dataset
+
 
 from torch.utils.data import DataLoader
 import torch
@@ -15,54 +16,45 @@ import numpy as np
 from collections import OrderedDict
 
 
-
-def predict_one_img(model, img_dataset, args):
-    dataloader = DataLoader(dataset=img_dataset, batch_size=1, num_workers=0, shuffle=False)
+def predict(model,test_loader,n_labels):
     model.eval()
-    test_dice = DiceAverage(args.n_labels)
-    #target = to_one_hot_3d(img_dataset.label, args.n_labels)
-
     with torch.no_grad():
-        for data in tqdm(dataloader,total=len(dataloader)):
-            data = data.to(device)
+        for idx, (data, target) in tqdm(enumerate(val_loader), total=len(val_loader)):
+            tmp_target = target
+            data, target = data.float(), target.long()
+            target = common.to_one_hot_3d(target, n_labels)
+            data, target = data.to(device), target.to(device)
             output = model(data)
-            # output = nn.functional.interpolate(output, scale_factor=(1//args.slice_down_scale,1//args.xy_down_scale,1//args.xy_down_scale), mode='trilinear', align_corners=False) # 空间分辨率恢复到原始size
-            img_dataset.update_result(output.detach().cpu())
+            # 计算froc
+            if not args.cpu:
+                res = output.cpu()
+            else:
+                res = output
+            pred = res.numpy()
+            tmp_target = tmp_target.numpy()
+            metrics.FROC2(pred,tmp_target)
 
-    pred = img_dataset.recompone_result()
-    pred = torch.argmax(pred,dim=1)
-
-    pred_img = common.to_one_hot_3d(pred,args.n_labels)
-    #test_dice.update(pred_img, target)
-
-    test_dice = OrderedDict({'Dice': test_dice.avg[1]})
-
-    pred = np.asarray(pred.numpy(),dtype='uint8')
-    if args.postprocess:
-        pass # TO DO
-    pred = sitk.GetImageFromArray(np.squeeze(pred,axis=0))
-
-    return test_dice, pred
 
 if __name__ == '__main__':
     args = config.args
     args.test_data_path = "../dataset/fixed_val"
     save_path = os.path.join('./experiments', args.save)
     device = torch.device('cpu' if args.cpu else 'cuda:1')
+    val_loader = DataLoader(dataset=Val_Dataset(args), batch_size=1, num_workers=args.n_threads, shuffle=False)
+
     # model info
     model = UNet(in_channel=1, out_channel=args.n_labels,training=False).to(device)
     model = torch.nn.DataParallel(model, device_ids=args.gpu_id)  # multi-GPU
     ckpt = torch.load('{}/best_model.pth'.format(save_path))
     model.load_state_dict(ckpt['net'])
+    predict(model,val_loader,2)
+    # test_log = logger.Test_Logger(save_path,"test_log")
+    # # data info
+    # result_save_path = '{}/result'.format(save_path)
+    # if not os.path.exists(result_save_path):
+    #     os.mkdir(result_save_path)
 
-    test_log = logger.Test_Logger(save_path,"test_log")
-    # data info
-    result_save_path = '{}/result'.format(save_path)
-    if not os.path.exists(result_save_path):
-        os.mkdir(result_save_path)
-
-    datasets = Test_Datasets(args.test_data_path,args=args)
-    for img_dataset,file_idx in datasets:
-        test_dice,pred_img = predict_one_img(model, img_dataset, args)
-        test_log.update(file_idx, test_dice)
-        sitk.WriteImage(pred_img, os.path.join(result_save_path, 'result-'+file_idx+'.gz'))
+    # for img_dataset,file_idx in datasets:
+    #     test_dice,pred_img = predict_one_img(model, img_dataset, args)
+    #     test_log.update(file_idx, test_dice)
+    #     sitk.WriteImage(pred_img, os.path.join(result_save_path, 'result-'+file_idx+'.gz'))
