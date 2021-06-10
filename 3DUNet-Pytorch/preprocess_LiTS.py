@@ -100,21 +100,6 @@ class ribfrac_train_preprocess:
                             ct.GetSpacing()[1] * int(1 / self.xy_down_scale), self.slice_down_scale))
         return new_ct, new_seg
 
-    def write_train_name_list(self):
-        data_name_list = os.listdir(join(self.fixed_path, "ct"))
-        data_num = len(data_name_list)
-        print('the fixed dataset total numbers of samples is :', data_num)
-        random.shuffle(data_name_list)
-        #self.write_name_list(data_name_list, "train_path_list.txt")
-
-    # def write_name_list(self, name_list, file_name):
-    #     f = open(join(self.fixed_path, file_name), 'w')
-    #     for name in name_list:
-    #         ct_path = os.path.join(self.fixed_path, 'ct', name)
-    #         seg_path = os.path.join(self.fixed_path, 'label', name.replace('image', 'label'))
-    #         f.write(ct_path + ' ' + seg_path + "\n")
-    #     f.close()
-
 
 class ribfrac_val_preprocess:
     def __init__(self, raw_dataset_path, fixed_dataset_path, args):
@@ -178,21 +163,6 @@ class ribfrac_val_preprocess:
                             ct.GetSpacing()[1] * int(1 / xy_down_scale), slice_down_scale))
         return new_ct, new_seg
 
-    def write_train_name_list(self):
-        data_name_list = os.listdir(join(self.fixed_path, "ct"))
-        data_num = len(data_name_list)
-        print('the fixed dataset total numbers of samples is :', data_num)
-        random.shuffle(data_name_list)
-        #self.write_name_list(data_name_list, "val_path_list.txt")
-
-    def write_name_list(self, name_list, file_name):
-        f = open(join(self.fixed_path, file_name), 'w')
-        for name in name_list:
-            ct_path = os.path.join(self.fixed_path, 'ct', name)
-            seg_path = os.path.join(self.fixed_path, 'label', name.replace('image', 'label'))
-            f.write(ct_path + ' ' + seg_path + "\n")
-        f.close()
-
 
 class ribfrac_test_preprocess:
     def __init__(self, raw_dataset_path, fixed_dataset_path, args):
@@ -239,20 +209,6 @@ class ribfrac_test_preprocess:
                            ct.GetSpacing()[1] * int(1 / xy_down_scale), slice_down_scale))
         return new_ct
 
-    def write_train_name_list(self):
-        data_name_list = os.listdir(join(self.fixed_path, "ct"))
-        data_num = len(data_name_list)
-        print('the fixed dataset total numbers of samples is :', data_num)
-        random.shuffle(data_name_list)
-        #self.write_name_list(data_name_list, "test_path_list.txt")
-
-    def write_name_list(self, name_list, file_name):
-        f = open(join(self.fixed_path, file_name), 'w')
-        for name in name_list:
-            ct_path = os.path.join(self.fixed_path, 'ct', name)
-            f.write(ct_path + "\n")
-        f.close()
-
 
 if __name__ == '__main__':
     raw_dataset_path = '../dataset/ribfrac/train'
@@ -261,7 +217,7 @@ if __name__ == '__main__':
     # args = config.args
     # tool = ribfrac_train_preprocess(raw_dataset_path, fixed_dataset_path, args)
     # tool.fix_data()  # 对原始图像进行修剪并保存
-    # tool.write_train_name_list()  # 创建索引txt文件
+
 
     raw_dataset_path = '../dataset/ribfrac/val'
     fixed_dataset_path = '../dataset/ribfrac/fixed_val'
@@ -269,7 +225,7 @@ if __name__ == '__main__':
     # args = config.args
     # tool = ribfrac_val_preprocess(raw_dataset_path, fixed_dataset_path, args)
     # tool.fix_data()  # 对原始图像进行修剪并保存
-    # tool.write_train_name_list()  # 创建索引txt文件
+
 
     raw_dataset_path = '../dataset/ribfrac/test'
     fixed_dataset_path = '../dataset/ribfrac/fixed_test'
@@ -277,4 +233,4 @@ if __name__ == '__main__':
     args = config.args
     tool = ribfrac_test_preprocess(raw_dataset_path, fixed_dataset_path, args)
     tool.fix_data()  # 对原始图像进行修剪并保存
-    tool.write_train_name_list()  # 创建索引txt文件
+
