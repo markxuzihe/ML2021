@@ -96,20 +96,6 @@ class RibFrac_train_preprocess:
                             ct.GetSpacing()[1] * int(1 / self.xy_down_scale), self.slice_down_scale))
         return new_ct, new_seg
 
-    def write_train_name_list(self):
-        data_name_list = os.listdir(join(self.fixed_path, "ct"))
-        data_num = len(data_name_list)
-        print('the fixed dataset total numbers of samples is :', data_num)
-        random.shuffle(data_name_list)
-        self.write_name_list(data_name_list, "train_path_list.txt")
-
-    def write_name_list(self, name_list, file_name):
-        f = open(join(self.fixed_path, file_name), 'w')
-        for name in name_list:
-            ct_path = os.path.join(self.fixed_path, 'ct', name)
-            seg_path = os.path.join(self.fixed_path, 'label', name.replace('image', 'label'))
-            f.write(ct_path + ' ' + seg_path + "\n")
-        f.close()
 
 
 class RibFrac_val_preprocess:
@@ -171,20 +157,6 @@ class RibFrac_val_preprocess:
                             ct.GetSpacing()[1] * int(1 / xy_down_scale), slice_down_scale))
         return new_ct, new_seg
 
-    def write_train_name_list(self):
-        data_name_list = os.listdir(join(self.fixed_path, "ct"))
-        data_num = len(data_name_list)
-        print('the fixed dataset total numbers of samples is :', data_num)
-        random.shuffle(data_name_list)
-        self.write_name_list(data_name_list, "val_path_list.txt")
-
-    def write_name_list(self, name_list, file_name):
-        f = open(join(self.fixed_path, file_name), 'w')
-        for name in name_list:
-            ct_path = os.path.join(self.fixed_path, 'ct', name)
-            seg_path = os.path.join(self.fixed_path, 'label', name.replace('image', 'label'))
-            f.write(ct_path + ' ' + seg_path + "\n")
-        f.close()
 
 
 class RibFrac_test_preprocess:
@@ -232,19 +204,7 @@ class RibFrac_test_preprocess:
                            ct.GetSpacing()[1] * int(1 / xy_down_scale), slice_down_scale))
         return new_ct
 
-    def write_train_name_list(self):
-        data_name_list = os.listdir(join(self.fixed_path, "ct"))
-        data_num = len(data_name_list)
-        print('the fixed dataset total numbers of samples is :', data_num)
-        random.shuffle(data_name_list)
-        self.write_name_list(data_name_list, "test_path_list.txt")
 
-    def write_name_list(self, name_list, file_name):
-        f = open(join(self.fixed_path, file_name), 'w')
-        for name in name_list:
-            ct_path = os.path.join(self.fixed_path, 'ct', name)
-            f.write(ct_path + "\n")
-        f.close()
 
 if __name__ == '__main__':
     # raw_dataset_path = '../dataset/train'
