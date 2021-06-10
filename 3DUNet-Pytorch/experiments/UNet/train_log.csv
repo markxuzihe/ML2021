@@ -1,0 +1,2 @@
+epoch,Train_Loss,Train_dice,Val_Loss,Val_dice,Val_Froc
+1,0.5034,0.0002,0.5001,0.0073,0.6000000000000009

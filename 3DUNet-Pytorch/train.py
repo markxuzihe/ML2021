@@ -98,12 +98,12 @@ def train(model, train_loader, optimizer, loss_func, n_labels, alpha):
 
 if __name__ == '__main__':
     args = config.args
-    args.dataset_path = "../dataset/ribfrac/fixed_train"
-    args.val_data_path = "../dataset/ribfrac/fixed_val"
+    args.dataset_path = "../dataset/fixed_train"
+    args.val_data_path = "../dataset/fixed_val"
     save_path = os.path.join('./experiments', args.save)
     if not os.path.exists(save_path): os.mkdir(save_path)
     device = torch.device('cpu'
-                          if args.cpu else 'cuda'
+                          if args.cpu else 'cuda:1'
                           )
     # data info
     train_loader = DataLoader(dataset=Train_Dataset(args), batch_size=args.batch_size, num_workers=args.n_threads,
