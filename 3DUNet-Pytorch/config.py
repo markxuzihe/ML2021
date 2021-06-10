@@ -28,7 +28,7 @@ parser.add_argument('--save', default='UNet', help='save path of trained model')
 parser.add_argument('--batch_size', type=list, default=4, help='batch size of trainset')
 
 # train
-parser.add_argument('--epochs', type=int, default=200, metavar='N', help='number of epochs to train (default: 200)')
+parser.add_argument('--epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 200)')
 parser.add_argument('--lr', type=float, default=0.0001, metavar='LR', help='learning rate (default: 0.0001)')
 parser.add_argument('--early-stop', default=30, type=int, help='early stopping (default: 30)')
 parser.add_argument('--crop_size', type=int, default=48)
