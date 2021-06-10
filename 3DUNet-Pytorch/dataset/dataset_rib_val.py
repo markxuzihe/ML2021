@@ -24,7 +24,6 @@ class Val_Dataset(dataset):
         seg = sitk.ReadImage(self.filename_list[index][1], sitk.sitkUInt8)
         ct_array = sitk.GetArrayFromImage(ct)
         seg_array = sitk.GetArrayFromImage(seg)
-        seg_array=np.where(seg_array>0.5, 1, 0)
         ct_array = ct_array / self.args.norm_factor
         ct_array = ct_array.astype(np.float32)
 

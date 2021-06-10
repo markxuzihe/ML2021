@@ -33,7 +33,6 @@ class Train_Dataset(dataset):
 
         ct_array = ct_array / self.args.norm_factor
         ct_array = ct_array.astype(np.float32)
-        seg_array=np.where(seg_array>0.5, 1, 0)
         ct_array = torch.FloatTensor(ct_array).unsqueeze(0)
         seg_array = torch.FloatTensor(seg_array).unsqueeze(0)
 
