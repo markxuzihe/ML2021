@@ -19,7 +19,7 @@ from collections import OrderedDict
 def predict(model,test_loader,n_labels):
     model.eval()
     with torch.no_grad():
-        for idx, (data, target) in tqdm(enumerate(val_loader), total=len(val_loader)):
+        for idx, (data, target) in tqdm(enumerate(test_loader), total=len(test_loader)):
             tmp_target = target
             data, target = data.float(), target.long()
             target = common.to_one_hot_3d(target, n_labels)
@@ -30,9 +30,16 @@ def predict(model,test_loader,n_labels):
                 res = output.cpu()
             else:
                 res = output
-            pred = res.numpy()
-            tmp_target = tmp_target.numpy()
-            metrics.FROC2(pred,tmp_target)
+            print(np.sum(res.numpy()[0,1,:]))
+            print(res.numpy()[0,1,:].shape)
+            pred = res.numpy()[0,1,:]
+            tmp_target = tmp_target.numpy()[0,:]
+            tmp_target = tmp_target.flatten()
+            pred = pred.flatten()
+            print(np.sum(tmp_target))
+            print(np.sum(pred))
+            metrics.FROC2(tmp_target,pred)
+            break
 
 
 if __name__ == '__main__':

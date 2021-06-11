@@ -133,20 +133,20 @@ def FROC2(gt_label, pred_label, key_fp_list=(0.5, 1, 2, 4, 8)):
     """
     gt_num = sum(gt_label)
     total_num = len(pred_label)
+    # print(gt_num)
+    # print(type(gt_label))
+    # print(type(pred_label))
+    # print(gt_label.shape)
+    # print(pred_label.shape)
+    # print(np.sum(pred_label))
 
-    
     fpr, tpr, thresholds = metrics.roc_curve(gt_label, pred_label, pos_label=1)
-
+    print(len(fpr))
+    print(len(tpr))
+    print(len(thresholds))
 
     fps = fpr * (total_num -  gt_num) / total_num
     sens = tpr
-
-    froc = 0
-    count=0
-    # for i in range(len(sens)):
-    #     if i in key_fp_list:
-    #         count+=1
-    #         froc+=
 
     plt.plot(fps, sens, color='b', lw=2)
     plt.legend(loc='lower right')
