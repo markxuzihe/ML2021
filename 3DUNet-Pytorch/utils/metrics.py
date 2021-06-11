@@ -68,29 +68,28 @@ def FROC(gt_label, pred_label, key_fp_list=(0.5, 1, 2, 4, 8)):
     items = gt_label.shape[0]
     Fp = []
     Recall = []
-    for i in range(items):
-        gt_label_i = np.argmax(gt_label[i,:], axis=0).astype(np.uint8)
-        pred_label_i = pred_label[i,:].astype(np.uint8)
+    gt_label_i = gt_label
+    pred_label_i = pred_label
 
-        # GT and prediction must have the same shape
-        assert gt_label_i.shape == pred_label_i.shape, \
-            "The prediction and ground-truth have different shapes. gt:" \
-                f" {gt_label.shape} and pred: {pred_label.shape}."
+    # GT and prediction must have the same shape
+    assert gt_label_i.shape == pred_label_i.shape, \
+        "The prediction and ground-truth have different shapes. gt:" \
+            f" {gt_label.shape} and pred: {pred_label.shape}."
 
-        # binarize the GT and prediction
-        gt_bin = (gt_label_i > 0).astype(np.uint8)
-        pred_bin = (pred_label_i > 0).astype(np.uint8)
+    # binarize the GT and prediction
+    gt_bin = (gt_label_i > 0).astype(np.uint8)
+    pred_bin = (pred_label_i > 0).astype(np.uint8)
 
-        intersection = np.logical_and(gt_bin, pred_bin)
-        union = np.logical_or(gt_bin, pred_bin)
+    intersection = np.logical_and(gt_bin, pred_bin)
+    union = np.logical_or(gt_bin, pred_bin)
 
-        EPS = 1e-8
-        TP = intersection.sum()
-        FP = (union > 0).sum() - TP
-        fp = (FP + EPS) / ((pred_bin > 0).sum() + EPS)
-        recall = (TP + EPS) / ((gt_bin > 0).sum() + EPS)
-        Fp.append(fp)
-        Recall.append(recall)
+    EPS = 1e-8
+    TP = intersection.sum()
+    FP = (union > 0).sum() - TP
+    fp = (FP + EPS) / ((pred_bin > 0).sum() + EPS)
+    recall = (TP + EPS) / ((gt_bin > 0).sum() + EPS)
+    Fp.append(fp)
+    Recall.append(recall)
 
     key_recall = [_interpolate_recall_at_fp(Fp, Recall, key_fp)
                   for key_fp in key_fp_list]
@@ -126,7 +125,7 @@ def _interpolate_recall_at_fp(fp, recall, key_fp):
 
 
 def _remove_low_probs(pred, prob_thresh):
-    pred = np.where(pred > prob_thresh, pred, 0)
+    pred = np.where(pred > prob_thresh, 1, 0)
 
     return pred
 
@@ -139,7 +138,7 @@ def _remove_small_objects(pred, size_thresh):
     return pred
 
 
-def post_process(pred, prob_thresh=0.1, size_thresh=30):
+def post_process(pred, prob_thresh=0.1, size_thresh=10):
 
     # remove connected regions with low confidence
     pred = _remove_low_probs(pred, prob_thresh)

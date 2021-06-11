@@ -56,8 +56,9 @@ def val(model, val_loader, loss_func, n_labels):
                 res = output.cpu()
             else:
                 res = output
-            pred = res.numpy()
-            tmp_target = tmp_target.numpy()
+            pred = res.numpy()[0, 1, :]
+            pred = metrics.post_process(pred)
+            tmp_target = tmp_target.numpy()[0, :]
             froc = metrics.FROC(pred, tmp_target)
             frocs.update(froc)
 

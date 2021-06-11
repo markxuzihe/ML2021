@@ -207,26 +207,26 @@ class RibFrac_test_preprocess:
 
 
 if __name__ == '__main__':
-    # raw_dataset_path = '../dataset/train'
-    # fixed_dataset_path = '../dataset/fixed_train'
+    raw_dataset_path = '../dataset/train'
+    fixed_dataset_path = '../dataset/fixed_train'
+
+    args = config.args
+    tool = RibFrac_train_preprocess(raw_dataset_path, fixed_dataset_path, args)
+    tool.fix_data()  # 对原始图像进行修剪并保存
+
+
+    # raw_dataset_path = '../dataset/val'
+    # fixed_dataset_path = '../dataset/fixed_val'
     #
     # args = config.args
-    # tool = RibFrac_train_preprocess(raw_dataset_path, fixed_dataset_path, args)
+    # tool = RibFrac_val_preprocess(raw_dataset_path, fixed_dataset_path, args)
     # tool.fix_data()  # 对原始图像进行修剪并保存
-
-
-    raw_dataset_path = '../dataset/val'
-    fixed_dataset_path = '../dataset/fixed_val'
-
-    args = config.args
-    tool = RibFrac_val_preprocess(raw_dataset_path, fixed_dataset_path, args)
-    tool.fix_data()  # 对原始图像进行修剪并保存
-
-
-    raw_dataset_path = '../dataset/test'
-    fixed_dataset_path = '../dataset/fixed_test'
-
-    args = config.args
-    tool = RibFrac_test_preprocess(raw_dataset_path, fixed_dataset_path, args)
-    tool.fix_data()  # 对原始图像进行修剪并保存
+    #
+    #
+    # raw_dataset_path = '../dataset/test'
+    # fixed_dataset_path = '../dataset/fixed_test'
+    #
+    # args = config.args
+    # tool = RibFrac_test_preprocess(raw_dataset_path, fixed_dataset_path, args)
+    # tool.fix_data()  # 对原始图像进行修剪并保存
 
