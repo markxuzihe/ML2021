@@ -33,6 +33,7 @@ def predict(model,test_loader,n_labels):
             print(np.sum(res.numpy()[0,1,:]))
             print(res.numpy()[0,1,:].shape)
             pred = res.numpy()[0,1,:]
+            pred = metrics.post_process(pred)
             tmp_target = tmp_target.numpy()[0,:]
             tmp_target = tmp_target.flatten()
             pred = pred.flatten()

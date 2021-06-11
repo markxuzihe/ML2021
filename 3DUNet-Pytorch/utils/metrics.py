@@ -3,6 +3,8 @@ import torch.nn.functional as F
 import torch
 import numpy as np
 from sklearn import metrics
+from skimage.measure import label, regionprops
+from skimage.morphology import disk, remove_small_objects
 
 import matplotlib.pylab as plt
 class LossAverage(object):
@@ -121,6 +123,31 @@ def _interpolate_recall_at_fp(fp, recall, key_fp):
                    * ((key_fp - fp_0) / (fp_1 - fp_0 + 1e-8))
 
     return recall_at_fp
+
+
+def _remove_low_probs(pred, prob_thresh):
+    pred = np.where(pred > prob_thresh, pred, 0)
+
+    return pred
+
+
+def _remove_small_objects(pred, size_thresh):
+    pred_bin = pred > 0
+    pred_bin = remove_small_objects(pred_bin, size_thresh)
+    pred = np.where(pred_bin, pred, 0)
+
+    return pred
+
+
+def post_process(pred, prob_thresh=0.1, size_thresh=30):
+
+    # remove connected regions with low confidence
+    pred = _remove_low_probs(pred, prob_thresh)
+
+    # remove small connected regions
+    pred = _remove_small_objects(pred, size_thresh)
+
+    return pred
 
 
 def FROC2(gt_label, pred_label, key_fp_list=(0.5, 1, 2, 4, 8)):
