@@ -16,14 +16,11 @@ from models import UNet
 
 
 def _remove_low_probs(pred, prob_thresh):
-    print(np.max(pred))
-    print(prob_thresh)
-    print(np.sum(pred))
-    print(np.min(pred))
-    pred = np.where(pred > prob_thresh, 1,0)
-    print(np.max(pred))
-    print(np.min(pred))
-    print(np.sum(pred))
+
+    pred = np.where(pred > prob_thresh,1,0)
+    # print(np.max(pred))
+    # print(np.min(pred))
+    # print(np.sum(pred))
     return pred
 
 
@@ -61,6 +58,10 @@ def _remove_small_objects(pred, size_thresh):
 
 def _post_process(pred, image, prob_thresh, bone_thresh, size_thresh):
 
+
+    min_value = np.min(pred)
+    max_value = np.max(pred)
+    pred = np.where(pred>0,(pred-min_value)/(max_value-min_value),0)
     # remove connected regions with low confidence
     pred = _remove_low_probs(pred, prob_thresh)
 
@@ -151,9 +152,9 @@ def predict(args):
             args.prob_thresh, args.bone_thresh, args.size_thresh)
         # pred_arr = _remove_low_probs(pred_arr, args.prob_thresh)
         # pred_arr = _remove_small_objects(pred_arr, args.size_thresh)
-        print(np.sum(pred_arr))
-        print(pred_arr.shape)
-        print(np.max(pred_arr))
+        # print(np.sum(pred_arr))
+        # print(pred_arr.shape)
+        # print(np.max(pred_arr))
         pred_image, pred_info = _make_submission_files(pred_arr, image_id,
             dataset.image_affine)
         pred_info_list.append(pred_info)
@@ -171,9 +172,9 @@ if __name__ == "__main__":
     import argparse
 
     device = torch.device('cuda:1')
-    prob_thresh = 0.7
+    prob_thresh = 0.1
     bone_thresh = 500
-    size_thresh = 100
+    size_thresh = 12
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--image_dir", default='../dataset/fixed_val/ct',
