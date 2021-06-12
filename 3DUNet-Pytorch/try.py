@@ -11,15 +11,10 @@ from torch.utils.data import Dataset as dataset
 # for a,b,files in os.walk('../dataset/ribfrac/train/ct'):
 #     print(files)
 
-ct = sitk.ReadImage('../dataset/fixed_train/ct/RibFrac1-image.nii.gz', sitk.sitkInt16)
-seg = sitk.ReadImage('../dataset/fixed_train/label/RibFrac1-label.nii.gz', sitk.sitkUInt8)
+path = "../dataset/fixed_val/mylabel/"
 
-ct_array = sitk.GetArrayFromImage(ct)
-seg_array = sitk.GetArrayFromImage(seg)
+for file in os.listdir(path):
+    new_name = file.replace("_pred.nii",".nii")
+    os.rename(os.path.join(path,file),os.path.join(path,new_name))
 
-flag=0
-for i in range(len(seg_array)):
-    for j in range(len(seg_array[i])):
-        for k in seg_array[i][j]:
-            if k!=0:
-                print(k)
+

@@ -16,8 +16,14 @@ from models import UNet
 
 
 def _remove_low_probs(pred, prob_thresh):
-    pred = np.where(pred > prob_thresh, pred, 0)
-
+    print(np.max(pred))
+    print(prob_thresh)
+    print(np.sum(pred))
+    print(np.min(pred))
+    pred = np.where(pred > prob_thresh, 1,0)
+    print(np.max(pred))
+    print(np.min(pred))
+    print(np.sum(pred))
     return pred
 
 
@@ -58,9 +64,6 @@ def _post_process(pred, image, prob_thresh, bone_thresh, size_thresh):
     # remove connected regions with low confidence
     pred = _remove_low_probs(pred, prob_thresh)
 
-    # remove spine false positives
-    pred = _remove_spine_fp(pred, image, bone_thresh)
-
     # remove small connected regions
     pred = _remove_small_objects(pred, size_thresh)
 
@@ -76,10 +79,9 @@ def _predict_single_image(model, dataloader, postprocess, prob_thresh,
             images, centers = sample
             images = images.to(device)
             output = model(images)
+
             output = output.sigmoid().cpu().numpy()
             output = output[:,1,:,:,:]
-
-
             for i in range(len(centers)):
                 center_x, center_y, center_z = centers[i]
                 cur_pred_patch = pred[
@@ -147,16 +149,21 @@ def predict(args):
             batch_size, num_workers)
         pred_arr = _predict_single_image(model, dataloader, postprocess,
             args.prob_thresh, args.bone_thresh, args.size_thresh)
+        # pred_arr = _remove_low_probs(pred_arr, args.prob_thresh)
+        # pred_arr = _remove_small_objects(pred_arr, args.size_thresh)
+        print(np.sum(pred_arr))
+        print(pred_arr.shape)
+        print(np.max(pred_arr))
         pred_image, pred_info = _make_submission_files(pred_arr, image_id,
             dataset.image_affine)
         pred_info_list.append(pred_info)
-        pred_path = os.path.join(args.pred_dir, f"{image_id}_pred.nii.gz")
+        pred_path = os.path.join(args.pred_dir, f"{image_id}.nii.gz")
         nib.save(pred_image, pred_path)
 
         progress.update()
 
     pred_info = pd.concat(pred_info_list, ignore_index=True)
-    pred_info.to_csv(os.path.join(args.pred_dir, "pred_info.csv"),
+    pred_info.to_csv(os.path.join(args.pred_dir, "ribfrac-val-pred.csv"),
         index=False)
 
 
@@ -164,8 +171,8 @@ if __name__ == "__main__":
     import argparse
 
     device = torch.device('cuda:1')
-    prob_thresh = 0.1
-    bone_thresh = 300
+    prob_thresh = 0.7
+    bone_thresh = 500
     size_thresh = 100
 
     parser = argparse.ArgumentParser()
@@ -175,11 +182,11 @@ if __name__ == "__main__":
         help="The directory for saving predictions.")
     parser.add_argument("--model_path", default='experiments/UNet/best_model.pth',
         help="The PyTorch model weight path.")
-    parser.add_argument("--prob_thresh", default=0.1,
+    parser.add_argument("--prob_thresh", default=prob_thresh,
         help="Prediction probability threshold.")
-    parser.add_argument("--bone_thresh", default=300,
+    parser.add_argument("--bone_thresh", default=bone_thresh,
         help="Bone binarization threshold.")
-    parser.add_argument("--size_thresh", default=100,
+    parser.add_argument("--size_thresh", default=size_thresh,
         help="Prediction size threshold.")
     parser.add_argument("--postprocess", default="True",
         help="Whether to execute post-processing.")
