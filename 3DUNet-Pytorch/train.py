@@ -112,9 +112,9 @@ if __name__ == '__main__':
     val_loader = DataLoader(dataset=Val_Dataset(args), batch_size=1, num_workers=args.n_threads, shuffle=False)
 
     # model info
-    model = UNet(in_channel=1, out_channel=args.n_labels, training=True).to(device)
+    model = UNet(1, args.n_labels).to(device)
 
-    model.apply(weights_init.init_model)
+    #model.apply(weights_init.init_model)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     # common.print_network(model)
     model = torch.nn.DataParallel(model, device_ids=args.gpu_id)  # multi-GPU
