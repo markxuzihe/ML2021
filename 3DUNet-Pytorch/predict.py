@@ -16,7 +16,7 @@ import numpy as np
 from collections import OrderedDict
 
 
-def predict(model,file_path,n_labels):
+def predict(model,file_path,args):
     model.eval()
     with torch.no_grad():
         file_name_list = []
@@ -27,9 +27,15 @@ def predict(model,file_path,n_labels):
             file_name_list.append(file_name)
         
         for index in range(len(file_name_list)):
-            ct = sitk.ReadImage(file_name_list[index], sitk.sitkInt16)
+            ct = sitk.ReadImage(file_path+'/ct/'+file_name_list[index], sitk.sitkInt16)
+            ct = sitk.GetArrayFromImage(ct)
+            ct = ct/args.norm_factor
+            ct = ct.astype(np.float32)
+            ct = torch.FloatTensor(ct).unsqueeze(0)
+            
             ct = ct.float()
             ct = ct.to(device)
+
             output = model(ct)
             pred = output.numpy()[0,1,:]
             my_label = sitk.GetImageFromArray(pred)
@@ -51,6 +57,7 @@ if __name__ == '__main__':
     device = torch.device('cuda:1')
     # model info
     model = UNet(in_channel=1, out_channel=args.n_labels,training=False).to(device)
+    model = torch.nn.DataParallel(model, device_ids=args.gpu_id)  # multi-GPU
     ckpt = torch.load('{}/best_model.pth'.format(save_path))
     model.load_state_dict(ckpt['net'])
-    predict(model,test_data_path,2)
+    predict(model,test_data_path,args)
