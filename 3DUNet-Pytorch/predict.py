@@ -10,9 +10,9 @@ from skimage.measure import label, regionprops
 from skimage.morphology import disk, remove_small_objects
 from tqdm import tqdm
 
-from dataset.fracnet_dataset import FracNetInferenceDataset
-from dataset import transforms as tsfm
-from model.unet import UNet
+from utils.fracnet_dataset import FracNetInferenceDataset
+from utils import transforms as tsfm
+from models import UNet
 
 
 def _remove_low_probs(pred, prob_thresh):
@@ -120,8 +120,8 @@ def predict(args):
     batch_size = 16
     num_workers = 4
     postprocess = True if args.postprocess == "True" else False
-
-    model = UNet(1, 1, first_out_channels=16)
+    device = torch.device('cuda:1')
+    model = UNet(in_channel=1, out_channel=2,training=False).to(device)
     model.eval()
     if args.model_path is not None:
         model_weights = torch.load(args.model_path)
@@ -168,11 +168,11 @@ if __name__ == "__main__":
     size_thresh = 100
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--image_dir", required=True,
+    parser.add_argument("--image_dir", default='../dataset/fixed_val/ct',
         help="The image nii directory.")
-    parser.add_argument("--pred_dir", required=True,
+    parser.add_argument("--pred_dir", default='../dataset/my_label/ct',
         help="The directory for saving predictions.")
-    parser.add_argument("--model_path", default=None,
+    parser.add_argument("--model_path", default='experiments/UNet/best_model.pth',
         help="The PyTorch model weight path.")
     parser.add_argument("--prob_thresh", default=0.1,
         help="Prediction probability threshold.")
