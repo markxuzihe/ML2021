@@ -37,6 +37,7 @@ def predict(model,file_path,args):
             ct = ct.to(device)
 
             output = model(ct)
+            print(output.shape)
             pred = output.numpy()[0,1,:]
             my_label = sitk.GetImageFromArray(pred)
             my_label.SetDirection(ct.GetDirection())

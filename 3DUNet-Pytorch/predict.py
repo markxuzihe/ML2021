@@ -74,8 +74,11 @@ def _predict_single_image(model, dataloader, postprocess, prob_thresh,
     with torch.no_grad():
         for _, sample in enumerate(dataloader):
             images, centers = sample
-            images = images.cuda()
-            output = model(images).sigmoid().cpu().numpy().squeeze(axis=1)
+            images = images.to(device)
+            output = model(images)
+            output = output.sigmoid().cpu().numpy()
+            output = output[:,1,:,:,:]
+
 
             for i in range(len(centers)):
                 center_x, center_y, center_z = centers[i]
@@ -120,13 +123,11 @@ def predict(args):
     batch_size = 16
     num_workers = 4
     postprocess = True if args.postprocess == "True" else False
-    device = torch.device('cuda:1')
     model = UNet(in_channel=1, out_channel=2,training=False).to(device)
+    model = torch.nn.DataParallel(model, device_ids=[1])  # multi-GPU
     model.eval()
-    if args.model_path is not None:
-        model_weights = torch.load(args.model_path)
-        model.load_state_dict(model_weights)
-    model = nn.DataParallel(model).cuda()
+    ckpt = torch.load(args.model_path)
+    model.load_state_dict(ckpt['net'])
 
     transforms = [
         tsfm.Window(-200, 1000),
@@ -162,7 +163,7 @@ def predict(args):
 if __name__ == "__main__":
     import argparse
 
-
+    device = torch.device('cuda:1')
     prob_thresh = 0.1
     bone_thresh = 300
     size_thresh = 100
@@ -170,7 +171,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--image_dir", default='../dataset/fixed_val/ct',
         help="The image nii directory.")
-    parser.add_argument("--pred_dir", default='../dataset/my_label/ct',
+    parser.add_argument("--pred_dir", default='../dataset/fixed_val/mylabel',
         help="The directory for saving predictions.")
     parser.add_argument("--model_path", default='experiments/UNet/best_model.pth',
         help="The PyTorch model weight path.")
