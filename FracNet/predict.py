@@ -17,6 +17,9 @@ from model.unet import UNet
 
 def _remove_low_probs(pred, prob_thresh):
     pred = np.where(pred > prob_thresh, pred, 0)
+    tmp_max = np.max(pred)
+    pred = np.where(pred > tmp_max*0.7, pred, 0)
+
 
     return pred
 
@@ -152,7 +155,7 @@ def predict(args):
         pred_image, pred_info = _make_submission_files(pred_arr, image_id,
             dataset.image_affine)
         pred_info_list.append(pred_info)
-        pred_path = os.path.join(args.pred_dir, f"{image_id}-label.nii.gz")
+        pred_path = os.path.join(args.pred_dir, f"{image_id}.nii.gz")
         nib.save(pred_image, pred_path)
         # exit(0)
         # stop_time += 1
@@ -162,7 +165,7 @@ def predict(args):
         progress.update()
 
     pred_info = pd.concat(pred_info_list, ignore_index=True)
-    pred_info.to_csv(os.path.join(args.pred_dir, "ribfrac-test-pred.csv"),
+    pred_info.to_csv(os.path.join(args.pred_dir, "ribfrac-val-pred.csv"),
         index=False)
 
 
@@ -170,16 +173,16 @@ if __name__ == "__main__":
     import argparse
 
 
-    prob_thresh = 0.1
+    prob_thresh = 0.5
     bone_thresh = 300
-    size_thresh = 100
+    size_thresh = 200
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--image_dir", default='../dataset/test/ct',
+    parser.add_argument("--image_dir", default='../dataset/val/ct',
         help="The image nii directory.")
-    parser.add_argument("--pred_dir", default='../dataset/test/mylabel',
+    parser.add_argument("--pred_dir", default='../dataset/val/mylabel',
         help="The directory for saving predictions.")
-    parser.add_argument("--model_path", default='result/latest_model_weights.pth',
+    parser.add_argument("--model_path", default='result/test_weight_best.pth',
         help="The PyTorch model weight path.")
     parser.add_argument("--prob_thresh", default=prob_thresh,
         help="Prediction probability threshold.")
