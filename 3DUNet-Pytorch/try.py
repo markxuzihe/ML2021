@@ -11,10 +11,11 @@ from torch.utils.data import Dataset as dataset
 # for a,b,files in os.walk('../dataset/ribfrac/train/ct'):
 #     print(files)
 
-path = "../dataset/fixed_val/mylabel/"
+# path = "../dataset/test/mylabel/"
+path = "../../FracNet/mylabel/"
 
 for file in os.listdir(path):
-    new_name = file.replace("_pred.nii",".nii")
+    new_name = file.replace("_label.nii",".nii")
     os.rename(os.path.join(path,file),os.path.join(path,new_name))
 
 

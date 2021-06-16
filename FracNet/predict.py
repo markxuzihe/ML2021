@@ -74,7 +74,8 @@ def _predict_single_image(model, dataloader, postprocess, prob_thresh,
     with torch.no_grad():
         for _, sample in enumerate(dataloader):
             images, centers = sample
-            images = images.cuda()
+            # images = images.cuda()
+            images = images.to("cuda:1")
             output = model(images).sigmoid().cpu().numpy().squeeze(axis=1)
 
             for i in range(len(centers)):
@@ -117,7 +118,7 @@ def _make_submission_files(pred, image_id, affine):
 
 
 def predict(args):
-    batch_size = 16
+    batch_size = 64
     num_workers = 4
     postprocess = True if args.postprocess == "True" else False
 
@@ -126,7 +127,8 @@ def predict(args):
     if args.model_path is not None:
         model_weights = torch.load(args.model_path)
         model.load_state_dict(model_weights)
-    model = nn.DataParallel(model).cuda()
+    # model = nn.DataParallel(model).cuda()
+    model = nn.DataParallel(model,device_ids=[1]).to("cuda:1")
 
     transforms = [
         tsfm.Window(-200, 1000),
@@ -140,6 +142,7 @@ def predict(args):
 
     progress = tqdm(total=len(image_id_list))
     pred_info_list = []
+    # stop_time = 0
     for image_id, image_path in zip(image_id_list, image_path_list):
         dataset = FracNetInferenceDataset(image_path, transforms=transforms)
         dataloader = FracNetInferenceDataset.get_dataloader(dataset,
@@ -149,13 +152,17 @@ def predict(args):
         pred_image, pred_info = _make_submission_files(pred_arr, image_id,
             dataset.image_affine)
         pred_info_list.append(pred_info)
-        pred_path = os.path.join(args.pred_dir, f"{image_id}_pred.nii.gz")
+        pred_path = os.path.join(args.pred_dir, f"{image_id}-label.nii.gz")
         nib.save(pred_image, pred_path)
+        # exit(0)
+        # stop_time += 1
+        # if stop_time == 2:
+        #     exit(0)
 
         progress.update()
 
     pred_info = pd.concat(pred_info_list, ignore_index=True)
-    pred_info.to_csv(os.path.join(args.pred_dir, "pred_info.csv"),
+    pred_info.to_csv(os.path.join(args.pred_dir, "ribfrac-test-pred.csv"),
         index=False)
 
 
@@ -168,17 +175,17 @@ if __name__ == "__main__":
     size_thresh = 100
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--image_dir", required=True,
+    parser.add_argument("--image_dir", default='../dataset/test/ct',
         help="The image nii directory.")
-    parser.add_argument("--pred_dir", required=True,
+    parser.add_argument("--pred_dir", default='../dataset/test/mylabel',
         help="The directory for saving predictions.")
-    parser.add_argument("--model_path", default=None,
+    parser.add_argument("--model_path", default='result/latest_model_weights.pth',
         help="The PyTorch model weight path.")
-    parser.add_argument("--prob_thresh", default=0.1,
+    parser.add_argument("--prob_thresh", default=prob_thresh,
         help="Prediction probability threshold.")
-    parser.add_argument("--bone_thresh", default=300,
+    parser.add_argument("--bone_thresh", default=bone_thresh,
         help="Bone binarization threshold.")
-    parser.add_argument("--size_thresh", default=100,
+    parser.add_argument("--size_thresh", default=size_thresh,
         help="Prediction size threshold.")
     parser.add_argument("--postprocess", default="True",
         help="Whether to execute post-processing.")
